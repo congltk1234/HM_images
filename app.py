@@ -34,7 +34,6 @@ def main():
     imgURL = st.sidebar.text_input('Image path', '')
     my_upload = st.sidebar.file_uploader("Upload an image", type=["png", "jpg", "jpeg"])
     if my_upload is not None:
-        print(my_upload.name)
         image = Image.open(my_upload)
         st.sidebar.image(image)
         imgURL = ''
@@ -52,15 +51,20 @@ def main():
 ################ Sector 1: Find Similar Items #########################################################################
     items = pd.read_csv('data/items.csv')
     
-    if page_selection == "Find similar items":
+    if page_selection == "Find similar items" and (imgURL is not None or my_upload is not None ):
         image_embeddings = np.load('embedding_feature/hm_embeddings_effb0.npy')
         # knn = joblib.load('embedding_feature/knn.joblib')
         KNN = 6
         knn = NearestNeighbors(n_neighbors=KNN)
         knn.fit(image_embeddings)
         model = EfficientNetB0(weights='imagenet', include_top=False, pooling='avg', input_shape=None)
-        print(path)
-        distances, indices = compute_distances_fromPath(items, path, model, knn)
+        
+        if my_upload is not None:
+            img = Image.open(my_upload).convert('RGB') 
+            img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+        else: 
+            img = cv2.imread(path) 
+        distances, indices = compute_distances_fromPath(items, img, model, knn)
         for idx in indices[0]:
             print(f'Product ID: {items.iloc[idx].article_id} \n {items.iloc[idx].prod_name} \n {items.iloc[idx].product_type_name},{items.iloc[idx].product_group_name}')
         # print(distances)
