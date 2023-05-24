@@ -5,8 +5,11 @@ from PIL import Image
 import urllib.request
 import cv2
 import tensorflow as tf
-# from funcs import *
+from image_func import *
 import streamlit.components.v1 as components
+import joblib
+from sklearn.neighbors import NearestNeighbors
+from tensorflow.keras.applications import EfficientNetB0
 
 def main():
 
@@ -21,7 +24,6 @@ def main():
     
     page_selection = st.sidebar.radio("Try", page_options)
 
-#     articles_df = pd.read_csv('articles.csv')
     
     models = ['Similar items based on image embeddings', 
               'Similar items based on text embeddings', 
@@ -52,8 +54,38 @@ def main():
             st.sidebar.image(image)
         except:
             st.write('Cannot download')
-   
-
+#########################################################################################
+################ Sector 1: Find Similar Items #########################################################################
+    items = pd.read_csv('data/items.csv')
+    
+    if page_selection == "Find similar items":
+        image_embeddings = np.load('embedding_feature/hm_embeddings_effb0.npy')
+        st.dataframe(items.head())
+        # knn = joblib.load('embedding_feature/knn.joblib')
+        KNN = 5
+        knn = NearestNeighbors(n_neighbors=KNN)
+        knn.fit(image_embeddings)
+        model = EfficientNetB0(weights='imagenet', include_top=False, pooling='avg', input_shape=None)
+        print(path)
+        distances, indices = compute_distances_fromPath(items, path, model, knn)
+        for idx in indices[0]:
+            print(f'Product ID: {items.iloc[idx].article_id} \n {items.iloc[idx].prod_name} \n {items.iloc[idx].product_type_name},{items.iloc[idx].product_group_name}')
+        # print(distances)
+        with st.container():     
+                # for idx, score_set in zip(indices[0], distances):
+                container = st.expander('Similar items based on image embeddings')
+                with container:
+                    cols = st.columns(7)
+                    cols[0].write('###### Similarity Score')
+                    # cols[0].caption(model_desc[0])
+                    for idx, col, score in zip(indices[0][1:], cols[1:], distances[0][1:]):
+                        with col:
+                            st.caption('{}'.format(score))
+                            print(items.iloc[idx].image)
+                            image = Image.open(items.iloc[idx].image)
+                            st.image(image, use_column_width=True)
+                            # if model == 'Similar items based on text embeddings':
+                            #     st.caption(items.iloc[idx].image)
 if __name__ == '__main__':
     main()
 
