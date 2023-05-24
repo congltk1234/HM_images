@@ -5,7 +5,7 @@ from PIL import Image
 import urllib.request
 import cv2
 import tensorflow as tf
-from funcs import *
+# from funcs import *
 import streamlit.components.v1 as components
 
 def main():
