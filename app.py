@@ -21,7 +21,7 @@ def main():
     
     page_selection = st.sidebar.radio("Try", page_options)
 
-    articles_df = pd.read_csv('articles.csv')
+#     articles_df = pd.read_csv('articles.csv')
     
     models = ['Similar items based on image embeddings', 
               'Similar items based on text embeddings', 
