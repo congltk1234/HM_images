@@ -52,3 +52,8 @@ def main():
             st.sidebar.image(image)
         except:
             st.write('Cannot download')
+   
+
+if __name__ == '__main__':
+    main()
+
