@@ -26,16 +26,10 @@ def main():
 
     
     models = ['Similar items based on image embeddings', 
-              'Similar items based on text embeddings', 
-              'Similar items based discriptive features', 
-              'Similar items based on embeddings from TensorFlow Recommendrs model',
-              'Similar items based on a combination of all embeddings']
+              'Similar items based on text embeddings']
     
     model_descs = ['Image embeddings are calculated using VGG16 CNN from Keras', 
-                  'Text description embeddings are calculated using "universal-sentence-encoder" from TensorFlow Hub',
-                  'Features embeddings are calculated by one-hot encoding the descriptive features provided by H&M',
-                  'TFRS model performes a collaborative filtering based ranking using a neural network', 
-                  'A concatenation of all embeddings above is used to find similar items']
+                  'Text description embeddings are calculated using "universal-sentence-encoder" from TensorFlow Hub']
         
     imgURL = st.sidebar.text_input('Image path', '')
     my_upload = st.sidebar.file_uploader("Upload an image", type=["png", "jpg", "jpeg"])
@@ -60,9 +54,8 @@ def main():
     
     if page_selection == "Find similar items":
         image_embeddings = np.load('embedding_feature/hm_embeddings_effb0.npy')
-        st.dataframe(items.head())
         # knn = joblib.load('embedding_feature/knn.joblib')
-        KNN = 5
+        KNN = 6
         knn = NearestNeighbors(n_neighbors=KNN)
         knn.fit(image_embeddings)
         model = EfficientNetB0(weights='imagenet', include_top=False, pooling='avg', input_shape=None)
@@ -73,19 +66,18 @@ def main():
         # print(distances)
         with st.container():     
                 # for idx, score_set in zip(indices[0], distances):
-                container = st.expander('Similar items based on image embeddings')
+                container = st.expander('Similar items based on image embeddings', expanded =True)
                 with container:
-                    cols = st.columns(7)
+                    cols = st.columns(6)
                     cols[0].write('###### Similarity Score')
                     # cols[0].caption(model_desc[0])
                     for idx, col, score in zip(indices[0][1:], cols[1:], distances[0][1:]):
                         with col:
-                            st.caption('{}'.format(score))
-                            print(items.iloc[idx].image)
+                            st.caption(score)
                             image = Image.open(items.iloc[idx].image)
                             st.image(image, use_column_width=True)
                             # if model == 'Similar items based on text embeddings':
-                            #     st.caption(items.iloc[idx].image)
+                            st.caption(items.iloc[idx].prod_name)
 if __name__ == '__main__':
     main()
 
